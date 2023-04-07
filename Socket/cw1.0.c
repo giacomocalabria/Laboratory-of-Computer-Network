@@ -5,7 +5,15 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+#define ENTITY_SIZE 1000000
+struct headers{
+char * n;
+char * v;
+};
 
+struct headers h[100];
+char sl[1001];
+char hbuf[5000];
 
 //       int socket(int domain, int type, int protocol);
 
@@ -13,10 +21,10 @@ struct sockaddr_in remote_addr;
 unsigned char * ip;
 char * request = "GET / HTTP/1.0\r\n\r\n";
 char request2[100];
-unsigned char response[1000001];
+unsigned char entity[ENTITY_SIZE+1];
 int main()
 {
-int s,t;
+int i,j,s,t;
 
 if (-1 ==(s = socket(AF_INET, SOCK_STREAM, 0))) {
 	perror("Socket fallita");
@@ -34,12 +42,36 @@ if(t ==-1) {
 }
 for(t=0;request[t];t++);
  write(s,request,t);
-	//sleep(2);
+for(i=0;i<1000 && read(s,sl+i,1) && (sl[i]!='\n' || sl[(i)?i-1:i]!='\r');i++){ }
+sl[i]=0;
+printf("Status Line ----> %s\n ", sl);
+
+h[0].n = & hbuf[0];
+for(j=0,i=0;i<5000 && read(s,hbuf+i,1);i++){
+	if(hbuf[i]=='\n' && hbuf[(i)?i-1:i]=='\r'){
+		hbuf[i-1]=0;
+		if(h[j].n[0] == 0) break;
+		h[++j].n=hbuf+i+1;
+													// j=j+1 ; h[j].n =....   <---- h[++j];
+													// h[j].n =....;  j=j+1;  <---- h[j++];
+	}
+	else if(hbuf[i]==':' && ! h[j].v ){
+		hbuf[i]=0;
+		h[j].v=hbuf+i+1;
+	}		
+}
+for(i=0;h[i].n[0];i++)
+	printf("h[%d].n ---> %s , h[%d].v ---> %s\n",i,h[i].n,i,h[i].v);
+
+for(i=0;i<ENTITY_SIZE && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
+entity[i]=0;
+printf("%s",entity);
+}
+/*
 while(t=read(s,response,1000000)){
 	for(int i=0; i<t;i++) printf("%c",response[i]);
 }
-}
-
+*/
 // 142.250.200.36
 // struct sockaddr_in {
                //sa_family_t    sin_family; /* address family: AF_INET */

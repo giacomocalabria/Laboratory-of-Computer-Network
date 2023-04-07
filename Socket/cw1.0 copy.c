@@ -5,13 +5,21 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+struct headers{
+  char *n;
+  char *v;
+};
 
+struct headers h[100];
+char hbuf[5000]; 
+
+//L'header non può esser lungo quanto si vuole
 
 //       int socket(int domain, int type, int protocol);
 
 struct sockaddr_in remote_addr;
 unsigned char * ip;
-char * request = "GET / \r\n";
+char * request = "GET / HTTP/1.0\r\n\r\n";
 char request2[100];
 unsigned char response[1000001];
 int main()
@@ -34,7 +42,8 @@ if(t ==-1) {
 }
 for(t=0;request[t];t++);
  write(s,request,t);
-	//sleep(2);
+
+h[0].n = hbuf[0];
 while(t=read(s,response,1000000)){
 	for(int i=0; i<t;i++) printf("%c",response[i]);
 }
@@ -51,5 +60,4 @@ while(t=read(s,response,1000000)){
            //struct in_addr {
                //uint32_t       s_addr;     /* address in network byte order */
            //};
-
 
