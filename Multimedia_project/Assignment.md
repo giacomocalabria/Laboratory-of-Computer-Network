@@ -13,7 +13,7 @@ Il programma prodotto deve eseguire le operazioni seguenti:
 1. Caricare un'immagine a colori RGB in formato BMP e/o JPG e/o PGM (uno dei tre formati è sufficiente)
 2. Effettuare il cambio di spazio dei colori da RGB a YCbCr
 3. Per ognuna delle componenti Y, Cb e Cr, dato un numero R tra 1 e 100:
-   1. Effettua la DCT bidimensionale con blocchi di dimensione parametrizzabile N della component
+   1. Effettua la DCT bidimensionale con blocchi di dimensione parametrizzabile N della componenti
    2. Mette a zero una frazione pari a R% dei coefficienti DCT dell'intera componente
    3. Effettua la DCT inversa sui blocchi dopo sogliaggio, ottenendo la versione "compressa" della componente
    4. Calcola l'MSE tra la componente originale e la componente "compressa"
