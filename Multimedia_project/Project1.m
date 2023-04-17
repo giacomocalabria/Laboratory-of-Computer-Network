@@ -3,7 +3,7 @@ clear all;
 clc;
 
 %% Parametri
-N = 16 ; % Dimensione del blocco per la DCT
+N = 4; % Dimensione del blocco per la DCT
 R = 10:10:100; % Valori di R da 10 a 100 a passi di 10
 
 % Loading an RGB image
@@ -32,9 +32,8 @@ for i = 1:numel(R)
     cr_dct = blockproc(cr, [N N], dctfun);
 
     % Calcola la frazione dei coefficenti DCT dell'intera componente da
-    % mettere a zero
-
-    % prctile(A,p) return percentiles of elements in input data A for the percentages p in the interval [0,100].
+    % mettere a zero; prctile(A,p) return percentiles of elements in input
+    % data A for the percentages p in the interval [0,100].
     perc_y = prctile(abs(y_dct(:)), R(i));
     perc_cb = prctile(abs(cb_dct(:)), R(i));
     perc_cr = prctile(abs(cr_dct(:)), R(i));
@@ -51,9 +50,9 @@ for i = 1:numel(R)
 
     % Calcolo dell'MSE per la componente Y, Cb e Cr tra quella originale e
     % la componente "compressa"
-    mse_y = mean((double(y(:)) - double(y_compressed(:))).^2);
-    mse_cb = mean((double(cb(:)) - double(cb_compressed(:))).^2);
-    mse_cr = mean((double(cr(:)) - double(cr_compressed(:))).^2);
+    mse_y = immse(double(y(:)),double(y_compressed(:)));
+    mse_cb = immse(double(cb(:)),double(cb_compressed(:)));
+    mse_cr = immse(double(cr(:)),double(cr_compressed(:)));
 
     % Calcolo dell'MSE pesato e del PSNR e meorizzazione dei valori di PSNR
     mse_P = (3/4) * mse_y + (1/8) * mse_cb + (1/8) * mse_cr;
