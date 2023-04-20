@@ -4,11 +4,11 @@ clc;
 
 %% Parametri
 N = 8; % Dimensione del blocco per la DCT
-%R = [10,12,14,16,18,20,22,30,40,50,60,70,80,90,93,95,96,97,98,99,99.5,99.9];
-R = 10:0.5:99.9; % Valori di R da 10 a 100 a passi di 10
+R = [10,12,14,16,18,20,22,30,40,50,60,70,80,90,93,95,96,97,98,99,99.5,99.9,100];
+%R = 10:5:100; % Valori di R da 10 a 100 a passi di 10
 
 % Loading an RGB image
-rgb_in = imread("hgmqKlpI_o.png");
+rgb_in = imread("coffee.bmp");
 
 % Inizializzazione dei vettori per i valori di PSNR
 psnr = zeros(size(R));
