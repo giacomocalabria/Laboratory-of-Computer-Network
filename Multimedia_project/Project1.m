@@ -3,8 +3,9 @@ clear all;
 clc;
 
 %% Parametri
-N = 4; % Dimensione del blocco per la DCT
-R = 10:10:100; % Valori di R da 10 a 100 a passi di 10
+N = 8; % Dimensione del blocco per la DCT
+%R = [10,12,14,16,18,20,22,30,40,50,60,70,80,90,93,95,96,97,98,99,99.5,99.9];
+R = 10:0.5:99.9; % Valori di R da 10 a 100 a passi di 10
 
 % Loading an RGB image
 rgb_in = imread("hgmqKlpI_o.png");
@@ -18,6 +19,8 @@ dctinvfun = @(block) idct2(block.data);
 
 % Calcolo del PSNR per diversi valori di R
 for i = 1:numel(R)
+    clc;
+    disp(i/numel(R)*100+" %");
     % Converting the RGB image to YCbCr space
     ycbcr_in = rgb2ycbcr(rgb_in);
 
@@ -61,9 +64,9 @@ end
 
 % Tracciamento della curva del PSNR in funzione di R
 figure;
-plot(R, psnr, 'o-', 'LineWidth', 2, 'DisplayName', 'PSNR');
-xlabel('R (%)');
-ylabel('PSNR (dB)');
+plot(R, psnr, 'LineWidth', 2, 'DisplayName', 'PSNR');
+xlabel('R (\%)','Interpreter','latex');
+ylabel('PSNR (dB)','Interpreter','latex');
 t = "PSNR in funzione di R per N = " + N;
-title(t);
+title(t,'Interpreter','latex');
 grid on;
