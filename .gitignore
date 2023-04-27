@@ -279,3 +279,6 @@ TSWLatexianTemp*
 
 *.y
 *.yuv
+
+
+*.json

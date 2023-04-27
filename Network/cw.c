@@ -14,32 +14,30 @@ unsigned char * ip;
 char * request = "GET / \r\n";
 char request2[100];
 unsigned char response[1000001];
-int main(){
-  int s,t;
+int main()
+{
+int s,t;
 
-  if (-1 ==(s = socket(AF_INET, SOCK_STREAM, 0))) {
-    perror("Socket fallita");
-    printf("%d\n",errno);
-    return 1;
-  }
-  remote_addr.sin_family = AF_INET;
-  remote_addr.sin_port = htons(80);
-  ip = (unsigned char*)&remote_addr.sin_addr.s_addr; 
-  ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
-
-  t = connect(s,(struct sockaddr *) &remote_addr,sizeof(struct sockaddr_in));
-
-  if(t ==-1) {
-	  perror("Connect Fallita\n");
-    return 1;
-  }
-
-  for(t=0;request[t];t++);
-  write(s,request,t);
+if (-1 ==(s = socket(AF_INET, SOCK_STREAM, 0))) {
+	perror("Socket fallita");
+	printf("%d\n",errno);
+	return 1;
+}
+ remote_addr.sin_family = AF_INET;
+ remote_addr.sin_port = htons(80);
+ ip = (unsigned char*)&remote_addr.sin_addr.s_addr; 
+ ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
+t = connect(s,(struct sockaddr *) &remote_addr,sizeof(struct sockaddr_in));
+if(t ==-1) {
+	perror("Connect Fallita\n");
+  return 1;
+}
+for(t=0;request[t];t++);
+ write(s,request,t);
 	//sleep(2);
-  while(t=read(s,response,1000000)){
-	  for(int i=0; i<t;i++) printf("%c",response[i]);
-  }
+while(t=read(s,response,1000000)){
+	for(int i=0; i<t;i++) printf("%c",response[i]);
+}
 }
 
 // 142.250.200.36

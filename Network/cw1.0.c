@@ -20,6 +20,7 @@ char hbuf[5000];
 struct sockaddr_in remote_addr;
 unsigned char * ip;
 char * request = "GET / HTTP/1.0\r\n\r\n";
+
 char request2[100];
 unsigned char entity[ENTITY_SIZE+1];
 int main()
@@ -52,8 +53,6 @@ for(j=0,i=0;i<5000 && read(s,hbuf+i,1);i++){
 		hbuf[i-1]=0;
 		if(h[j].n[0] == 0) break;
 		h[++j].n=hbuf+i+1;
-													// j=j+1 ; h[j].n =....   <---- h[++j];
-													// h[j].n =....;  j=j+1;  <---- h[j++];
 	}
 	else if(hbuf[i]==':' && ! h[j].v ){
 		hbuf[i]=0;

@@ -66,6 +66,9 @@ for(i=0;h[i].n[0];i++){
 	if(!strcmp(h[i].n,"Content-Length"))
 		length=atoi(h[i].v);
 }
+
+if(length == -1) length = 5000;
+
 if(length == -1)
 	for(i=0;i<ENTITY_SIZE && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
 else
