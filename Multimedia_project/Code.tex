@@ -1,0 +1,31 @@
+\begin{enumerate}
+    \item Caricamento dell' immagine
+    \item Cambio spazio dei colori da RGB a YCbCr
+    \item Per ognuna delle componenti Y,Cb e Cr si è proceduto a fare la DCT bidimensionale con blocchi di dimensione $N$ sulla singola componente, utilizzando la funzione \begin{lstlisting}[frame=single,style=Matlab-editor]
+blockproc(y, [N N], dctfun);
+        \end{lstlisting}dove \texttt{dctfun} è la funzione per la DCT sul blocco.
+    \begin{enumerate}
+        \item Successivamente è stata calcolata la frazione R\% dei coefficienti DCT dell'\textbf{intera componenete} da mettere a zero 
+        \begin{lstlisting}[frame=single,style=Matlab-editor]
+perc_y = prctile(abs(y_dct(:)), R);
+        \end{lstlisting}
+        \item E' stata messa a zero la frazione calcolata al punto precedente \begin{lstlisting}[frame=single,style=Matlab-editor]
+y_dct(abs(y_dct) < perc_y) = 0;
+        \end{lstlisting}
+    \end{enumerate}
+    \item E' stata fatta la DCT inversa bidimensionale sui blocchi di lunghezza sempre $N$ sulla singola componente, sempre utilizzando la funzione \begin{lstlisting}[frame=single,style=Matlab-editor]
+blockproc(y, [N N], dctinvfun);
+        \end{lstlisting} dove \texttt{dctinvfun} è la funzione inversa della DCT sul blocco.
+    \item Calcolo dell'\textit{MSE} tra la componente originale e la componente "compressa" \begin{lstlisting}[frame=single,style=Matlab-editor]
+mse_y = immse(double(y(:)),double(y_compressed(:)));
+    \end{lstlisting}
+\end{enumerate}
+Successivamente è stato calcolato l'MSE pesato, utilizzando
+\begin{equation}
+    {MSE}_P = \frac3 4 {MSE}_Y + \frac 1 8 {MSE}_{Cb} + \frac 1 8 {MSE}_{Cr}
+\end{equation}
+da cui abbiamo calcolato poi il PSNR pesato come
+\begin{equation}
+    PSNR=10\log_{10} \left(\frac{255^2}{{MSE}_P}\right)
+\end{equation}
+Abbiamo proceduto poi a plottare in un grafico i diversi valori di PSNR ottenuti facendo variare opportunamente $R$ in un intervallo da 10 a 100.
