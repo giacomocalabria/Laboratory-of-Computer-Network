@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #define ENTITY_SIZE 1000000
+#define CHUNKED -2
 struct headers{
 char * n;
 char * v;
@@ -24,10 +25,12 @@ unsigned char * ip;
 char * request = "GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n";
 
 char request2[100];
+unsigned char chunk[10];
 unsigned char entity[ENTITY_SIZE+1];
+unsigned char check[3];
 int main()
 {
-int i,j,s,t;
+int i,j,s,t,chunk_size=-1;
 int length = -1;
 if (-1 ==(s = socket(AF_INET, SOCK_STREAM, 0))) {
 	perror("Socket fallita");
@@ -37,9 +40,7 @@ if (-1 ==(s = socket(AF_INET, SOCK_STREAM, 0))) {
  remote_addr.sin_family = AF_INET;
  remote_addr.sin_port = htons(80);
  ip = (unsigned char*)&remote_addr.sin_addr.s_addr; 
- //ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
-//147.162.235.155
- ip[0]=88; ip[1]=80;ip[2]=187;ip[3]=84;
+ ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
 t = connect(s,(struct sockaddr *) &remote_addr,sizeof(struct sockaddr_in));
 if(t ==-1) {
 	perror("Connect Fallita\n");
@@ -67,15 +68,51 @@ for(i=0;h[i].n[0];i++){
 	printf("h[%d].n ---> %s , h[%d].v ---> %s\n",i,h[i].n,i,h[i].v);
 	if(!strcmp(h[i].n,"Content-Length"))
 		length=atoi(h[i].v);
+	if(!strcmp(h[i].n,"Transfer-Encoding") && !strcmp(h[i].v," chunked"))
+		length = CHUNKED;
 }
 
-if(length == -1) length = 5000;
+printf("LENGTH: %d\n", length);
+if (length == CHUNKED) {
+	for (i=0, j=0, chunk_size=-1; chunk_size != 0; ) {
+		for(i=0; i<10 && (read(s,chunk+i,1)) && chunk[i-1]!='\r' && chunk[i]!='\n';i++);
+		chunk[i]=0;
+		printf("Estraggo chunksize: %s\n",chunk);
+		chunk_size=(int) strtol(chunk,NULL,16);
+		printf("Chunk size = %d\n", chunk_size);
+		printf("Consumo Chunk data\n");
+		for(i=0; i<ENTITY_SIZE && (t=read(s,entity+j,chunk_size-i)); i+=t, j+=t);
+		i = read(s,check,2);
+		printf("Check del CRLF dopo chunk data\n");
+		if (i!=2 || check[0]!='\r' || check[1]!='\n') {printf("Errore nella lettura del chunk-data\n"); return -1;}
+	}
+ 
+	entity[j]=0;
+}	
 
-if(length == -1)
-	for(i=0;i<ENTITY_SIZE && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
-else
+if(length != CHUNKED) {
 	for(i=0;i<length && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
 	entity[i]=0;
-	printf("%s",entity);
 }
+printf("%s\n",entity);
+}
+
+
+/* 
+       Chunked-Body   = *chunk
+                        last-chunk
+                        trailer
+                        CRLF
+
+       chunk          = chunk-size [ chunk-extension ] CRLF
+                        chunk-data CRLF
+       chunk-size     = 1*HEX
+       last-chunk     = 1*("0") [ chunk-extension ] CRLF
+
+       chunk-extension= *( ";" chunk-ext-name [ "=" chunk-ext-val ] )
+       chunk-ext-name = token
+       chunk-ext-val  = token | quoted-string
+       chunk-data     = chunk-size(OCTET)
+       trailer        = *(entity-header CRLF)
+*/
 
