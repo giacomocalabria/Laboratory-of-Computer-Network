@@ -1,9 +1,11 @@
-#include <sys/types.h>          /* See NOTES */ 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #define ENTITY_SIZE 10000 
  
@@ -13,7 +15,8 @@ struct headers{	// Struttura per gli header
 };
 
 int main(){
-	int i,j,s,t;
+	int i,j,s,t; 
+    int length = -1; // Lunghezza del contenuto della risposta
 
 	// Viene effettuata la chiamata a sistema per creare il socket
     s = socket(AF_INET, SOCK_STREAM, 0);
@@ -27,11 +30,11 @@ int main(){
         return 1; // Termina il programma in errore
     }
  
- 	/* struct sockaddr_in {
-               sa_family_t    sin_family;
-               in_port_t      sin_port;
-               struct in_addr sin_addr;
-           };
+ 	/*  struct sockaddr_in {
+            sa_family_t    sin_family;
+            in_port_t      sin_port;
+            struct in_addr sin_addr;
+        };
     */
     struct sockaddr_in remote_addr;
     unsigned char * ip;
@@ -42,7 +45,9 @@ int main(){
     ip = (unsigned char*)&remote_addr.sin_addr.s_addr; 
 
     // Per questo esempio prendiamo l'indirizzo di www.google.com (vedi sotto come)
-    ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
+    //ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
+    //147.162.235.155
+    ip[0]=88; ip[1]=80;ip[2]=187;ip[3]=84;
     
     // Istanzia il collegamento con connect()
 
@@ -53,14 +58,10 @@ int main(){
         perror("Connect Fallita\n"); // Manda un messaggio di errore
         return 1; // Termina il programma con codice di uscita 1 (errore)
     }
-    /*if(t==0){
-        printf("TUTTO OK\n");
-    }*/
-
 
 	// Invia la richiesta al server
 
-	char *request = "GET / HTTP/1.0\r\n\r\n"; // Stringa di richiesta da inviare al server (GET / HTTP/1.0\r\n\r\n) che rappresenta una richiesta di tipo GET all'endpoint "/" utilizzando la versione di protocollo HTTP 1.0. I caratteri "\r\n\r\n" rappresentano i caratteri di fine riga per segnalare la fine dell'header della richiesta.
+	char * request = "GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n"; // Richiesta da inviare al server (GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n) 
 	char request2[100];
 	for(t=0; request[t]; t++); 
     /* Conta il numero di caratteri della richiesta da inviare al server (non considera il carattere di fine stringa '\0') Viene eseguito un ciclo "for" per contare il numero di caratteri nella stringa di richiesta da inviare al server. Il ciclo continua fino a quando non viene raggiunto il carattere di fine stringa '\0', e ad ogni iterazione viene incrementato l'indice "t". Alla fine del ciclo, la variabile "t" contiene il numero di caratteri della stringa di richiesta da inviare al server (non considera il carattere di fine stringa '\0').*/
@@ -106,16 +107,21 @@ int main(){
 			h[j].v = hbuf+i+1;
 		}		
 	}
-
-	for(i=0;h[i].n[0];i++)  // Stampa gli header ricevuti dal server
-		printf("h[%d].n ---> %s , h[%d].v ---> %s\n",i,h[i].n,i,h[i].v); // Stampa gli header ricevuti dal server
+    // Elaborazione degli header della risposta del server
+    for(i=0;h[i].n[0];i++){
+	    printf("h[%d].n ---> %s , h[%d].v ---> %s\n",i,h[i].n,i,h[i].v);  // Stampa gli header ricevuti dal server
+	    if(!strcmp(h[i].n,"Content-Length")) // Se l'header corrente è "Content-Length", allora viene memorizzata la lunghezza dell'entity body della risposta del server nella variabile "length".
+		    length = atoi(h[i].v);  // atoi() converte una stringa in un intero
+    }
 
     // Legge l'entity body della risposta del server
 
-    printf("Leggo l'entity body della risposta del server\n");
-    printf("ENTITY_SIZE = %d\n",ENTITY_SIZE);
+    if(length == -1) length = 5000; // Se la risposta del server non contiene l'header "Content-Length", allora viene impostata la lunghezza dell'entity body a 5000.
 
-	for(i=0;i < ENTITY_SIZE && (t = read(s, entity+i, ENTITY_SIZE-i)); i+=t); // Legge l'entity body della risposta del server
+    if(length == -1)
+        for(i=0; i<ENTITY_SIZE && (t=read(s,entity+i,ENTITY_SIZE-i)); i+=t);
+    else
+        for(i=0; i<length && (t=read(s,entity+i,ENTITY_SIZE-i)); i+=t);
 
 	entity[i]=0;
 	printf("%s",entity);

@@ -30,7 +30,7 @@ int main(){
     } 
 
     // receive data from the server
-    char server_response[256];
+    char server_response[256]; // buffer for the response
     recv(network_socket, &server_response, sizeof(server_response), 0); // receive data from the socket
 
     // print out the server's response
