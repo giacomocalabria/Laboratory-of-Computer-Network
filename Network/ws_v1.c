@@ -14,22 +14,18 @@ char * reqline;
  } h[100];
  
 char hbuffer[10000];
-char command[100];
+
 struct sockaddr_in local_addr, remote_addr;
 char request[100000];
 char response[100000];
-char * method, *filename , *ver;
-
 int main(){
-FILE * fin;
-int s,s2,t,len,i,j,yes=1,length, err;
-char ch;
+int s,s2,t,len,i,j,yes=1,length;
 s = socket(AF_INET, SOCK_STREAM,0);
 if ( s == -1 ) { perror("Socket Fallita\n"); return 1;}
  t= setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int));
  if (t==-1){perror("setsockopt fallita"); return 1;}
 local_addr.sin_family = AF_INET;
-local_addr.sin_port = htons(8055);
+local_addr.sin_port = htons(8082);
 
 if ( bind( s,(struct sockaddr *) &local_addr, sizeof(struct sockaddr_in)) == -1){
 	perror("bind fallita");
@@ -56,59 +52,19 @@ while( 1 ){
  }
 for(i=0;h[i].n[0];i++){
   printf("h[%d].n ---> %s , h[%d].v ---> %s\n",i,h[i].n,i,h[i].v);
+  if(!strcmp(h[i].n,"Content-Length"))
+    length=atoi(h[i].v);
 }
 
-/* Request line:  <method> <SP> <URL><SP> <HTTP-ver><CRLF> */
-err = 0;
-method = reqline;
-for(;*reqline && *reqline!=' ';reqline++);
-if(*reqline==' '){ 
-	*reqline = 0; 
-	reqline++;
-	filename=reqline;
-	for(;*reqline && *reqline!=' ';reqline++);
-	if(*reqline==' '){ 
-		*reqline = 0; 
-		reqline++;
-		ver=reqline;
-		for(;*reqline ;reqline++);
-		if(*reqline) {printf("Error in version\n"); err=1;}
-	}
-	else { printf("Error in filename\n"); err=1; }
-}
-else {printf("Error in method\n"); err=1; }
 
-if (err) 
-	sprintf(response,"HTTP/1.1 400 Bad Request\r\n\r\n");
-else{
-printf("Method = %s, filename = %s, version = %s",method, filename, ver);
-if(!strcmp(method,"GET")){
-	if(!strncmp(filename,"/cgi/",5)){
-		sprintf(command,"%s > tmp",filename+5);
-		system(command);	
-		sprintf(filename,"/tmp");
-	}
-if ((fin = fopen(filename+1,"rt"))==NULL)
-		sprintf(response,"HTTP/1.1 404 Not Found\r\n\r\n");
-else{
-		sprintf(response,"HTTP/1.1 200 OK\r\n\r\n");
-		write(s2,response,strlen(response));
-		while( EOF != (ch=fgetc(fin))){
-			write(s2,&ch,1);
-		}
-		fclose(fin);
-		close(s2);
-		continue;
-		}
-	} 
-	else sprintf(response,"HTTP/1.1  501 Not Implemented\r\n\r\n");
-}
+	t= read(s2,request,1000);
+	sprintf(response,"HTTP/1.1 404 Not Found\r\n\r\n");
 	for(len=0;len<1000 && response[len] ; len++);
 	write(s2,response,len);
 	request[t]=0;
 	printf("%s\n",request);
 	close(s2);
-}
+	}
 }
 
 

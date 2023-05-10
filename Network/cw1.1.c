@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <sys/types.h>          /* See NOTES */ 
 #include <sys/socket.h>
 #include <stdio.h>
 #include <errno.h>
@@ -71,10 +71,7 @@ for(i=0;h[i].n[0];i++){
 
 if(length == -1) length = 5000;
 
-if(length == -1)
-	for(i=0;i<ENTITY_SIZE && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
-else
-	for(i=0;i<length && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
+for(i=0;i<length && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
 	entity[i]=0;
 	printf("%s",entity);
 }

@@ -9,6 +9,7 @@
 
 #define ENTITY_SIZE 1000000
 #define CHUNKED -2
+#define UNDEFINED -1
 struct headers{
 char * n;
 char * v;
@@ -31,7 +32,7 @@ unsigned char check[3];
 int main()
 {
 int i,j,s,t,chunk_size=-1;
-int length = -1;
+int length = UNDEFINED;
 if (-1 ==(s = socket(AF_INET, SOCK_STREAM, 0))) {
 	perror("Socket fallita");
 	printf("%d\n",errno);
@@ -89,9 +90,12 @@ if (length == CHUNKED) {
  
 	entity[j]=0;
 }	
-
-if(length != CHUNKED) {
+else if(length !=UNDEFINED) {
 	for(i=0;i<length && (t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
+	entity[i]=0;
+}
+else{ 
+	for(i=0;(t=read(s,entity+i,ENTITY_SIZE-i));i+=t);
 	entity[i]=0;
 }
 printf("%s\n",entity);
