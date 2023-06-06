@@ -1,0 +1,30 @@
+sudo ping -c 2 -t 20 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 19 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 18 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 17 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 16 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 15 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 14 la.speedtest.clouvider.net 
+sudo ping -c 2 -t 13 la.speedtest.clouvider.net 
+
+E' necessario attraversare: 14 Link
+
+traceroute to la.speedtest.clouvider.net (77.247.126.223), 30 hops max, 60 byte packets
+ 1  LAPTOP-GIACOMO.mshome.net (172.28.160.1)  0.212 ms  0.195 ms  0.190 ms
+ 2  mt.wiffi.it (192.168.19.253)  1.666 ms  1.924 ms  1.918 ms
+ 3  192.168.50.1 (192.168.50.1)  1.929 ms  2.001 ms  1.996 ms
+ 4  10.255.250.1 (10.255.250.1)  4.041 ms  4.036 ms  4.031 ms
+ 5  pdma-s25.wind.it (151.6.140.15)  13.761 ms  13.756 ms  13.516 ms
+ 6  151.6.140.22 (151.6.140.22)  6.317 ms  5.485 ms  4.092 ms
+ 7  151.6.2.10 (151.6.2.10)  9.798 ms 151.6.0.92 (151.6.0.92)  10.362 ms  10.901 ms
+ 8  151.6.1.178 (151.6.1.178)  10.345 ms 151.6.1.182 (151.6.1.182)  11.677 ms  11.657 ms
+ 9  mno-b3-link.ip.twelve99.net (62.115.36.84)  11.983 ms  11.158 ms  11.100 ms
+10  prs-bb2-link.ip.twelve99.net (62.115.116.168)  27.699 ms  28.890 ms  27.688 ms
+11  rest-bb1-link.ip.twelve99.net (62.115.122.159)  103.841 ms  108.601 ms  109.640 ms
+12  lax-b22-link.ip.twelve99.net (62.115.114.86)  167.313 ms  167.309 ms  164.215 ms
+13  clouvider-ic-355873.ip.twelve99-cust.net (213.248.74.63)  161.870 ms  161.959 ms  162.680 ms
+14  * * *
+15  * * *
+16  * * *
+17  * * *
+18  77.247.126.223 (77.247.126.223)  162.593 ms  161.825 ms  163.247 ms
