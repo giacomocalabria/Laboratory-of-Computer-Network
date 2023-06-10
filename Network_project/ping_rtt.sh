@@ -2,9 +2,9 @@
 
 ## Ping ##
 
-server="www.google.it"
-nomefile="ris_rtt.txt"
-K=100
+server="la.speedtest.clouvider.net" # server di test
+nomefile="ris_rtt.txt" # nome del file di output
+K=150 # numero di ping da effettuare per ogni dimensione L
 
 if [ -f $nomefile ]; then
     rm $nomefile
@@ -12,7 +12,7 @@ fi
 
 for ((L=16; L<=1472; L++))
 do
-    command="sudo ping -c $K -s $L -A $server"
+    command="sudo ping -c $K -s $L -A $server"  # comando da eseguire (ping con K pacchetti di dimensione L)
 
     # Esecuzione del comando ping
     ping_output=$(eval "$command")
@@ -35,7 +35,7 @@ do
 
     # Stampa dei valori
     echo "$L;$rtt_min;$rtt_avg;$rtt_max;$rtt_mdev" >> $nomefile
-    
+
     # Percentuale completamento
     echo "$(((L * 100)/1472)) %  siamo a L = $L, scritto su file $nomefile i valori $rtt_min, $rtt_avg, $rtt_max, $rtt_mdev "
 done

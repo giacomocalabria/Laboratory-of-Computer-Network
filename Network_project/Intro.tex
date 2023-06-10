@@ -1,0 +1,30 @@
+In questo Homework si vogliono utilizzare alcuni strumenti messi a disposizione dal sistema operativo per stimare, tramite modelli matematici, il throughput di una connessione.
+\subsection{Ambiente utilizzato}
+Per eseguire il codice, è necessario avere accesso a un sistema operativo che supporti il comando \texttt{ping}. Nel nostro caso, abbiamo utilizzato il sistema operativo Linux per eseguire il codice, ma il codice può essere adattato a qualsiasi sistema operativo compatibile con il comando.\\\\
+Il codice per l'acquisizione dei dati del comando è stato scritto in bash, un linguaggio di scripting ampiamente utilizzato in ambiente Linux. Per eseguire il codice è necessario eseguire il comando: \texttt{sudo bash ./ping\_ttl.sh}. Si è scelto di utilizzare la shell di Linux in quanto l'applicativo \texttt{ping} è nativamente più completo su Linux.\\\\
+Per l'analisi dei dati raccolti con gli script, abbiamo invece utilizzato l'ambiente di MATLAB \Rcerchio in quanto fornisce metodi semplici per creare i grafici e i metodi numerici per stimare il coefficiente $a$ a partire dagli RTT minimi.\\\\
+NB: tutto il codice è contenuto nel file "Codice.zip" ed è stato inserito anche un file con i dati raccolti nell' esperimento
+\subsection{Il comando \texttt{ping}}
+L'applicazione \texttt{ping} utilizza il protocollo \textit{Internet Control Message Protocol} (ICMP), che si appoggia direttamente sull' \textit{Internet Protocol} (IP), senza coinvolgere alcun protocollo di livello di trasporto. Il suo scopo principale è quello di fornire uno strumento di diagnostica di rete che consente di capire se un certo host è raggiungibile o meno.\\\\
+In breve, l’applicazione \texttt{ping} invia una serie di pacchetti a una destinazione specificata, la quale risponde con pacchetti della stessa dimensione. L’applicazione misura e visualizza il cosiddetto \textit{Round-Trip Time} (RTT) per ogni pacchetto, ovvero il tempo che intercorre tra l’invio della richiesta e la ricezione della risposta.
+\clearpage
+\noindent Il RTT è influenzato da diversi fattori di ritardo su ogni singolo link del percorso da sorgente a destinazione e da destinazione a sorgente. I valori osservati di RTT dipendono dalla lunghezza $L$ del pacchetto, ma a parità di $L$, ogni esecuzione della misura può dar luogo a valori osservati diversi a causa dei ritardi di accodamento nei vari link. Il valore del RTT può variare notevolmente a seconda delle condizioni di rete, come la congestione, la qualità del collegamento e la distanza fisica tra i nodi.\\\\
+Dal manuale linux \texttt{ping(8)} abbiamo:
+\begin{verbatim}
+ping uses the ICMP protocol's mandatory ECHO_REQUEST datagram to elicit an ICMP 
+ECHO_RESPONSE from a host or gateway. ECHO_REQUEST datagrams (''pings'') have 
+an IP and ICMP header, followed by a struct timeval and then an arbitrary 
+number of ''pad'' bytes used to fill out the packet.
+\end{verbatim}
+Il comando \texttt{ping} è molto completo nell' ambiente Linux e permette di avere numerse opzioni/parametri; noi abbiamo utilizzato le seguenti:
+\begin{verbatim}
+ping -A -q [ -c count] [ -s packetsize] [ -t ttl] destination
+\end{verbatim}
+\begin{itemize}
+    \item \texttt{-A} permette di avere il cosiddetto "ping adattivo". Ovvero l'intervallo tra i pacchetti si adatta al tempo di andata e ritorno, in modo che effettivamente non più di una richiesta senza risposta sia presente nella rete.
+    \item \texttt{-q} output silenzioso. Non viene visualizzato nulla tranne le righe di riepilogo all'avvio e al termine.
+    \item \texttt{[ -c count]} interrompe il comando dopo aver inviato \#\texttt{count} pacchetti ECHO\_REQUEST
+    \item \texttt{[ -s packetsize]} specifica il numero di byte di dati da inviare.
+    \item \texttt{[ -t ttl]} imposta il Time to Live del protocollo IP
+\end{itemize}
+Tra i server disponibili, abbiamo scelto un server a Londra per eseguire i test dell' esperimento; raggiungibile all'indirizzo \texttt{lon.speedtest.clouvider.net}

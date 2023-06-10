@@ -1,0 +1,28 @@
+Nell'header del protocollo IP, il \textit{Time-To-Live} (TTL) è un campo che viene impostato dal mittente e decrementato di una unità ogni qual volta il pacchetto viene inoltrato da un nodo intermedio. Questo campo ha lo scopo di evitare che i pacchetti rimangano intrappolati indefinitamente nella rete. Quando un nodo riceve un pacchetto con un TTL di 1, se non è il destinatario finale, scarta il pacchetto e invia un messaggio di errore all'applicazione mittente. Pertanto, il TTL determina il numero massimo di link che il pacchetto può attraversare prima di raggiungere la sua destinazione.\\\\
+Per stimare il numero di link attraversati da un pacchetto, abbiamo sfruttando l'opzione del comando \texttt{ping} che permette di variare il campo TTL \texttt{[ -t ttl]}. Specificando il valore iniziale del TTL da utilizzare durante l'invio dei pacchetti, abbiamo gradualmente incrementato il valore del TTL finchè non abbiamo ottenuto una connessione senza errore, indicando che il pacchetto è riuscito a raggiungere la destinazione. \\\\
+Abbiamo creato uno script bash "ping\_ttl.sh" che automatizza questo processo e ci permette di determinare il valore minimo di TTL. Per eseguirlo è necessario inserire il comando da terminale: \texttt{sudo bash ./ping\_ttl.sh}\\\\
+Lo script ha prodotto il seguente output:
+\begin{verbatim}
+sudo ping -c 2 -t 4 lon.speedtest.clouvider.net
+sudo ping -c 2 -t 5 lon.speedtest.clouvider.net
+[...]
+sudo ping -c 2 -t 10 lon.speedtest.clouvider.net
+sudo ping -c 2 -t 11 lon.speedtest.clouvider.net
+
+E' necessario attraversare: n = 11 link per raggiungere la destinazione
+
+traceroute to lon.speedtest.clouvider.net (5.180.211.133), 30 hops max, 60 byte...
+ 1  _gateway (192.168.5.253)  0.585 ms  0.559 ms  0.556 ms
+ 2  10.255.250.1 (10.255.250.1)  0.727 ms  0.812 ms  0.960 ms
+ 3  pdma-s25.wind.it (151.6.140.15)  8.553 ms  8.550 ms  8.547 ms
+ 4  151.6.140.18 (151.6.140.18)  3.926 ms  3.924 ms  4.062 ms
+ 5  151.6.2.10 (151.6.2.10)  8.818 ms  8.813 ms  8.811 ms
+ 6  151.7.112.69 (151.7.112.69)  15.662 ms  12.502 ms  12.494 ms
+ 7  linx-lon1.eq-ld8.peering.clouvider.net (195.66.225.184)  32.714 ms  44.599 ...
+ 8  10.1.10.65 (10.1.10.65)  32.670 ms  32.667 ms  32.831 ms
+ 9  185.245.80.44 (185.245.80.44)  32.607 ms  32.605 ms  32.602 ms
+10  185.245.80.45 (185.245.80.45)  37.011 ms  37.008 ms  37.007 ms
+11  5.180.211.133 (5.180.211.133)  31.788 ms  31.785 ms  31.497 ms
+\end{verbatim}
+Abbiamo avviato i test con un valore iniziale di TTL pari a 4, poiché i primi nodi della rete sono dedicati all'uscita dal modem e quindi non ha senso testarli. Successivamente, abbiamo confrontato i risultati ottenuti utilizzando lo strumento di tracciamento del percorso \texttt{traceroute}. In entrambi i test, abbiamo osservato che il numero di link attraversati era di 11.\\\\
+Tuttavia, è importante notare che il numero di link attraversati ottenuto tramite il decremento del TTL o mediante l'utilizzo di \texttt{traceroute} non include il percorso di ritorno. Pertanto, per ottenere il numero totale di link $n$ attraversati durante il percorso di andata e ritorno, dobbiamo considerare il doppio del valore ottenuto tramite TTL o \texttt{traceroute}.
