@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define ENTITY_SIZE 10000 
+#define ENTITY_SIZE 1000
  
 struct headers{	// Struttura per gli header
 	char * n;  	// Nome dell'header
@@ -60,7 +60,7 @@ int main(){
 
 	// Invia la richiesta al server
 
-	char *request = "GET / HTTP/1.1\r\n\r\n"; 
+	char *request = "GET / HTTP/1.0\r\n\r\n"; 
     /* Richiesta HTTP da inviare al server 
        "GET / HTTP/1.0\r\n\r\n" è una stringa di caratteri che rappresenta una richiesta di tipo GET all'endpoint "/" utilizzando la versione di protocollo HTTP 1.0. I caratteri "\r\n\r\n" rappresentano i caratteri di fine riga per segnalare la fine dell'header della richiesta.
 
@@ -97,6 +97,26 @@ int main(){
     printf("La status line è lunga %d caratteri\n",i);  // Stampa la lunghezza della status line della risposta del server
     printf("Status Line ----> %s\n", sl);  // Stampa la status line della risposta del server
 
+    // Analisi della status line della risposta del server
+
+    unsigned char HTTP_version[100];  // Buffer per la versione di protocollo HTTP
+    int status_code;  // Variabile per il codice di stato HTTP
+    unsigned char Reason_Phrase[500];  // Buffer per la reason phrase della status line
+
+    for(i = 0; sl[i] != ' '; i++){
+        HTTP_version[i] = sl[i];
+    };
+    HTTP_version[i] = '\0';
+    printf("HTTP Version ----> %s\n", HTTP_version);
+    
+    unsigned char str[4];
+    for(++i,j = 0; sl[i] != ' ';i++,j++){
+        str[j] = sl[i];
+    }
+    str[3] = '\0';
+    status_code = atoi(str);
+    printf("Status Code ----> %d\n", status_code);
+
     struct headers h[100];   // Struttura per gli header della risposta del server
     char hbuf[5000];    // Buffer per la risposta del server (header + entity body) 
 
@@ -107,6 +127,7 @@ int main(){
     */
 
 	for(j=0, i=0; i < 5000 && read(s, hbuf+i, 1); i++){  // Legge gli header della risposta del server
+        //printf("hbuf[%d] ---> %c\n", i, hbuf[i]);
 		if(hbuf[i]=='\n' && hbuf[(i)?i-1:i]=='\r'){ // Se il carattere letto è un '\n' e il carattere precedente (hbuf[i-1]) è un '\r', allora è stato letto un carattere di fine riga '\n' seguito da un '\r' che indica la fine degli header della risposta del server.
 			hbuf[i-1] = 0;
 			if(h[j].n[0] == 0) break; // Se l'header è vuoto, termina il ciclo

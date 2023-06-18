@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 
-char * reqline;
+char * reqline;  
 struct header {
     char * n;
     char * v;

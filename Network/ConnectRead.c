@@ -52,13 +52,19 @@ int main(){
 
     // Invia la richiesta al server
 
-    char * request = "GET / \r\n"; // Richiesta da inviare al server
-    char request2[100]; // che cosa serve questo? 
-    
-    unsigned char response[1000001]; // Buffer per la risposta del server
+    char * request = "GET / \r\n";
+    /* Richiesta HTTP da inviare al server
+        "GET / \r\n" 
+        - GET è il metodo di richiesta
+        - / è il path della risorsa richiesta
+        - \r\n è il carattere di fine riga CRLF (Carriage Return Line Feed)
+
+        Essa è una Request del tipo Simple-Request (RFC 1945). Il server risponderà con una Response del tipo Simple-Response (RFC 1945)
+    */
   
     for(t=0; request[t]; t++); // Conta il numero di caratteri della richiesta da inviare al server (non considera il carattere di fine stringa '\0')
-    printf("Invio %d caratteri\n",t);
+    printf("Invio una richiesta di %d caratteri\n",t);
+
     // Invia la richiesta al server
     write(s, request, t);
     /*  write() è una chiamata a sistema che invia dati su un socket 
@@ -66,19 +72,27 @@ int main(){
         write() writes up to count bytes from the buffer starting at buf
         to the file referred to by the file descriptor fd.
     */
+	sleep(1);
 
-	sleep(2);
+    unsigned char response[1000000]; // Buffer per la risposta del server
 
     // Legge la risposta del server
     while(t = read(s, response, 1000000)){ // read legge i dati dal socket e li mette nel buffer response
-        // t è il numero di byte letti dal socket
+        // La variabile t serve per controllare se la lettura è andata a buon fine. Inoltre t contiene il numero di byte letti dal socket e scritti nel buffer response
         if(t == -1){ // Verifica se la lettura è andata a buon fine
             perror("Read fallita\n"); // Manda un messaggio di errore
             return 1; // Termina il programma con codice di uscita 1 (errore)
         }
-	    for(int i=0; i<t;i++)
+	    for(int i=0; i<t; i++)
             printf("%c",response[i]); // Stampa a video la risposta del server
     }
+
+    /*
+        read() è una chiamata a sistema che legge dati da un socket. 
+        s è il socket, response è il buffer in cui scrivere i dati letti, 1000000 è il numero di byte da leggere.
+
+        Se la lettura va a buon fine allora read() ritorna il numero di byte letti, altrimenti ritorna -1.
+    */
 
     return 0; // Termina il programma senza errori
 }
