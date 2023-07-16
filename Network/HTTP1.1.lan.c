@@ -39,15 +39,13 @@ int main(){
     unsigned char * ip;
 
     remote_addr.sin_family = AF_INET; // Tipo di collegamento (Protocollo internet IPv4)	
-    remote_addr.sin_port = htons(8082); // Porta di rete 80 (HTTP) in network byte order
+    remote_addr.sin_port = htons(80); // Porta di rete 80 (HTTP) in network byte order
 
     ip = (unsigned char*)&remote_addr.sin_addr.s_addr; 
 
-    // Per questo esempio prendiamo l'indirizzo di www.google.com (vedi sotto come)
-    //ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
-    //147.162.235.155
-    //ip[0]=88; ip[1]=80;ip[2]=187;ip[3]=84;
-    ip[0]=127; ip[1]=0;ip[2]=0;ip[3]=0;
+    // Per questo esempio prendiamo l'indirizzo di openoffice.org (vedi sotto come)
+    //65.108.131.22
+    ip[0]=65; ip[1]=108;ip[2]=131;ip[3]=22;
     
     // Istanzia il collegamento con connect()
 
@@ -65,7 +63,7 @@ int main(){
 
 	// Invia la richiesta al server
 
-	char * request = "GET /reflect \r\n\r\n"; 
+	char * request = "GET  http://www.openoffice.org/ HTTP/1.1\r\n\r\n"; 
     //char * request = "GET /pdrova.html HTTP/1.1\r\n\r\n"; 
     /* Richiesta HTTP/1.1 da inviare al server
         GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n

@@ -111,7 +111,7 @@ int main(){
             }
         }
 
-        // NOTA BENE: la parte sopra è uguale nel client e nel server
+        // NOTA BENE: la parte sopra è uguale nel clinet e nel server
 
         // Visualizza l'header della richiesta del client
 
@@ -179,6 +179,18 @@ int main(){
                 else{
                     sprintf(response,"HTTP/1.1 200 OK\r\n\r\n"); // Se il file esiste, allora il server invia la status line indicando che è presente il file (codice 200 OK)
                     write(s2,response,strlen(response)); // Scrive sul socket s2 la status line
+
+                    int ContentLength = 0;
+
+                    while( EOF != (ch=fgetc(fin))){
+                        ContentLength++;
+                    }
+
+                    rewind(fin); // Riporta il puntatore del file all'inizio del file
+
+                    sprintf(response,"Content-Length: %d\r\n\r\n",ContentLength); // Scrive sul socket s2 la Content-Length
+
+                    write(s2,response,strlen(response)); // Scrive sul socket s2 la Content-Length
 
                     while( EOF != (ch=fgetc(fin))){ // EOF è una costante definita in stdio.h che indica la fine del file
                         write(s2,&ch,1); // Scrive sul socket s2 il carattere ch letto dal file con fgetc()

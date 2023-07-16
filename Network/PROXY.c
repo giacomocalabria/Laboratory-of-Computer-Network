@@ -124,11 +124,11 @@ int main(){
         for(i=0;i<100 && reqline[i]!=' ';i++); 
         reqline[i++]=0;
 
-	    url=reqline+i;
+	    url = reqline+i;
 	    for(;i<100 && reqline[i]!=' ';i++);
         reqline[i++]=0;
 
-        ver=reqline+i;
+        ver = reqline+i;
         for(;i<100 && reqline[i]!='\r';i++);
         reqline[i++]=0;
 

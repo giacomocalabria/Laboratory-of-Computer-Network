@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <netdb.h> // Lib per gethostbyname()
 
 struct header {
     char * n;
@@ -111,7 +112,7 @@ int main(){
             }
         }
 
-        // NOTA BENE: la parte sopra è uguale nel client e nel server
+        // NOTA BENE: la parte sopra è uguale nel clinet e nel server
 
         // Visualizza l'header della richiesta del client
 
@@ -127,6 +128,8 @@ int main(){
         */
 
         err = 0;
+
+        char *richiesta = reqline;
         
         method = reqline;  
         for(;*reqline && *reqline!=' ';reqline++);
@@ -160,7 +163,7 @@ int main(){
 	        sprintf(response,"HTTP/1.1 400 Bad Request\r\n\r\n");
         }
         else{
-            printf("Method = %s, filename = %s, version = %s",method, filename, ver);
+            printf("Method = %s, filename = %s, version = %s\n",method, filename, ver);
             
             // Se il metodo è GET, allora il server invia la risorsa richiesto dal client
             if(!strcmp(method,"GET")){
@@ -168,6 +171,21 @@ int main(){
                     sprintf(command,"%s > tmp",filename+5);
                     system(command);	
                     sprintf(filename,"/tmp");
+                }
+
+                if(!strncmp(filename,"/reflect",9)){
+                    sprintf(response,"HTTP/1.1 200 OK\r\n\r\n");
+                    write(s2,response,strlen(response));
+                    printf("Request line: %s\n",richiesta);
+                    sprintf(response,"%s\r\n",richiesta);
+                    write(s2,response,strlen(response));
+                    printf("Porta: %u\n",htons(remote_addr.sin_port));
+                    printf("Indirizzo IP: %u\n",remote_addr.sin_addr.s_addr);
+                    //printf("%d.%d.%d.%d\n",(unsigned char) &remote_addr.sin_addr[0],(unsigned char) remote_addr.sin_addr[1],(unsigned char) remote_addr.sin_addr[2],(unsigned char) remote_addr.sin_addr[3]);
+                    // sprintf(response,"%\r\n%u\r\n",remote_addr.sin_addr.s_addr,remote_addr.sin_port);
+                    // write(s2,response,strlen(response));
+                    close(s2);
+                    continue;
                 }
 
                 /*

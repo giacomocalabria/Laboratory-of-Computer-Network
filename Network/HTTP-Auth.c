@@ -65,17 +65,16 @@ int main(){
 
 	// Invia la richiesta al server
 
-	char * request = "GET /reflect \r\n\r\n"; 
-    //char * request = "GET /pdrova.html HTTP/1.1\r\n\r\n"; 
+	//char * request = "GET /reflect \r\n\r\n"; 
+    char * request = "GET /prova.html HTTP/1.1\r\nHost:www.google.com\r\nAuthorization: Basic Z2lhY29tbzpnaWFjb21v\r\n\r\n"; 
     /* Richiesta HTTP/1.1 da inviare al server
         GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n
         GET è il metodo della richiesta
         / è il path della risorsa richiesta
         HTTP/1.1 è la versione del protocollo HTTP
-        \r\n indica la fine della riga
         Host:www.google.com è l'header Host con valore www.google.com
-        \r\n indica la fine della riga
-        \r\n indica la fine della riga
+        \r\n è un CRLF (carriage return + line feed) che indica la fine dell'header
+        Authorization: Basic "token" è l'header Authorization
 
         Essa è una Request del tipo
     */

@@ -18,10 +18,30 @@ char command[100];
 char request[100000];
 char response[100000];
 
+int authorized(const char *credentials){
+    FILE *file = fopen("token.txt", "r");
+    char *token = NULL;
+    size_t len = 0;
+    ssize_t nread = 0;
+
+    while((nread = getline(&token, &len, file)) != -1){
+        token[strcspn(token, "\n")] = '\0'; // Rimuovi il carattere '\n' dalla stringa 
+        if (!strcmp(token, credentials)) {
+            fclose(file); // Chiudi il file
+            return 1; // Credenziale trovata, restituisci 1
+        }
+    }
+    fclose(file); // Chiudi il file
+    return 0; // Credenziale non trovata, restituisci 0
+}
+
 int main(){
     FILE * fin;
     int s,s2,t,len,i,j,yes=1,length,err;
     char ch;
+
+    int authorization = 0;
+    char *credentials;
 
     // Viene creato un socket TCP
     s = socket(AF_INET, SOCK_STREAM, 0);
@@ -111,12 +131,18 @@ int main(){
             }
         }
 
-        // NOTA BENE: la parte sopra è uguale nel client e nel server
+        // NOTA BENE: la parte sopra è uguale nel clinet e nel server
 
         // Visualizza l'header della richiesta del client
 
         for(i=0;h[i].n[0];i++){
             printf("h[%d].n ---> %s , h[%d].v ---> %s\n",i,h[i].n,i,h[i].v);
+            if(!strcmp(h[i].n, "Authorization")){
+                authorization = 1;
+                credentials = h[i].v + 1;
+                for(;*credentials != ' '; credentials++);
+                credentials++;
+            }
         }
 
         /* 
@@ -164,11 +190,13 @@ int main(){
             
             // Se il metodo è GET, allora il server invia la risorsa richiesto dal client
             if(!strcmp(method,"GET")){
-                if(!strncmp(filename,"/cgi/",5)){
+                /*if(!strncmp(filename,"/cgi/",5)){
                     sprintf(command,"%s > tmp",filename+5);
-                    system(command);	
+                    fork();
+                    execve("/bin/sh",command,NULL);
+                    dup2(s2,1);
                     sprintf(filename,"/tmp");
-                }
+                }*/
 
                 /*
                     fopen() apre il file specificato dal parametro filename e restituisce un puntatore ad un oggetto di tipo FILE che viene utilizzato dalle altre funzioni per identificare il file. Il parametro mode specifica la modalità di apertura del file. La modalità "rt" apre il file in modalità lettura testuale. 
@@ -177,20 +205,28 @@ int main(){
                 if((fin = fopen(filename+1,"rt"))==NULL) // Tenta di aprire il file e verifica se esso esiste
                     sprintf(response,"HTTP/1.1 404 Not Found\r\n\r\n"); // Se il file non esiste, allora il server invia la status line indicando che non è presente il file (codice 404 Not Found)
                 else{
-                    sprintf(response,"HTTP/1.1 200 OK\r\n\r\n"); // Se il file esiste, allora il server invia la status line indicando che è presente il file (codice 200 OK)
-                    write(s2,response,strlen(response)); // Scrive sul socket s2 la status line
+                    if(authorization){
+                        if(authorized(credentials)){
+                            sprintf(response,"HTTP/1.1 200 OK\r\n\r\n"); // Se il file esiste, allora il server invia la status line indicando che è presente il file (codice 200 OK)
+                            write(s2,response,strlen(response)); // Scrive sul socket s2 la status line
 
-                    while( EOF != (ch=fgetc(fin))){ // EOF è una costante definita in stdio.h che indica la fine del file
-                        write(s2,&ch,1); // Scrive sul socket s2 il carattere ch letto dal file con fgetc()
+                            while( EOF != (ch=fgetc(fin))){ // EOF è una costante definita in stdio.h che indica la fine del file
+                                write(s2,&ch,1); // Scrive sul socket s2 il carattere ch letto dal file con fgetc()
+                            }
+
+                            /*
+                                fget() legge il carattere successivo dal file puntato da fin e lo restituisce come valore di ritorno. Se il carattere letto è EOF, allora la funzione restituisce EOF.
+                            */
+
+                            fclose(fin); // Chiude il file
+                            close(s2); // Chiude il socket s2
+                            continue; // Se il metodo è GET, allora il server invia il contenuto del file richiesto dal client e poi si rimette in attesa di connessioni in entrata. Riprende il while iniziale del main()
+                        } else {
+                            sprintf(response,"HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"Secure Area\"\r\n\r\n");
+                        }
+                    } else {
+                        sprintf(response,"HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"Secure Area\"\r\n\r\n");
                     }
-
-                    /*
-                        fget() legge il carattere successivo dal file puntato da fin e lo restituisce come valore di ritorno. Se il carattere letto è EOF, allora la funzione restituisce EOF.
-                    */
-
-                    fclose(fin); // Chiude il file
-                    close(s2); // Chiude il socket s2
-                    continue; // Se il metodo è GET, allora il server invia il contenuto del file richiesto dal client e poi si rimette in attesa di connessioni in entrata. Riprende il while iniziale del main()
                 }
             }
             else // Altrimenti, il server invia un messaggio di errore al client (metodo non implementato)

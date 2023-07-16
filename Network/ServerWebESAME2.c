@@ -111,7 +111,7 @@ int main(){
             }
         }
 
-        // NOTA BENE: la parte sopra è uguale nel client e nel server
+        // NOTA BENE: la parte sopra è uguale nel clinet e nel server
 
         // Visualizza l'header della richiesta del client
 
@@ -177,16 +177,29 @@ int main(){
                 if((fin = fopen(filename+1,"rt"))==NULL) // Tenta di aprire il file e verifica se esso esiste
                     sprintf(response,"HTTP/1.1 404 Not Found\r\n\r\n"); // Se il file non esiste, allora il server invia la status line indicando che non è presente il file (codice 404 Not Found)
                 else{
-                    sprintf(response,"HTTP/1.1 200 OK\r\n\r\n"); // Se il file esiste, allora il server invia la status line indicando che è presente il file (codice 200 OK)
+                    sprintf(response,"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n"); // Se il file esiste, allora il server invia la status line indicando che è presente il file (codice 200 OK)
                     write(s2,response,strlen(response)); // Scrive sul socket s2 la status line
+
+                    int ContentLength = 0;
+                    while( EOF != (ch=fgetc(fin))){
+                        ContentLength++;
+                    }
+                    rewind(fin); // Riporta il puntatore del file all'inizio del file
+
+                    sprintf(response,"%x\r\n",ContentLength); // Scrive sul socket s2 la lunghezza del file
+                    write(s2,response,strlen(response)); // Scrive sul socket s2 la lunghezza del file
 
                     while( EOF != (ch=fgetc(fin))){ // EOF è una costante definita in stdio.h che indica la fine del file
                         write(s2,&ch,1); // Scrive sul socket s2 il carattere ch letto dal file con fgetc()
                     }
 
                     /*
-                        fget() legge il carattere successivo dal file puntato da fin e lo restituisce come valore di ritorno. Se il carattere letto è EOF, allora la funzione restituisce EOF.
+                        fgetc() legge il carattere successivo dal file puntato da fin e lo restituisce come valore di ritorno. Se il carattere letto è EOF, allora la funzione restituisce EOF.
                     */
+
+                    sprintf(response,"\r\n\r\n\r\n"); // Fine del Chunked-Body
+
+                    write(s2,response,strlen(response)); // Scrive sul socket s2 la fine del file
 
                     fclose(fin); // Chiude il file
                     close(s2); // Chiude il socket s2

@@ -61,15 +61,17 @@ int main(){
     unsigned char * ip;
 
     remote_addr.sin_family = AF_INET; // Tipo di collegamento (Protocollo internet IPv4)	
-    remote_addr.sin_port = htons(80); // Porta di rete 80 (HTTP) in network byte order
+    remote_addr.sin_port = htons(8082); // Porta di rete 80 (HTTP) in network byte order
 
     ip = (unsigned char*)&remote_addr.sin_addr.s_addr; 
 
     // Per questo esempio prendiamo l'indirizzo di www.google.com (vedi sotto come)
     //147.162.235.155
-    ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
+    //ip[0]=142; ip[1]=250;ip[2]=200;ip[3]=36;
     
     //ip[0]=88; ip[1]=80;ip[2]=187;ip[3]=84;
+
+    ip[0]=127; ip[1]=0;ip[2]=0;ip[3]=0;
     
     // Istanzia il collegamento con connect()
 
@@ -87,7 +89,9 @@ int main(){
 
     // Invia la richiesta al server
 
-	char * request = "GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n"; 
+	//char * request = "GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n";
+    char * request = "GET /prova.html HTTP/1.1\r\n\r\n";
+    
     /* Richiesta HTTP/1.1 da inviare al server
         GET / HTTP/1.1\r\nHost:www.google.com\r\n\r\n
         GET è il metodo della richiesta
@@ -192,7 +196,8 @@ int main(){
             printf("Chunk size = %d\n", chunk_size);
             printf("Consumo Chunk data\n");
             for(i=0; i<ENTITY_SIZE && (t=read(s,entity+j,chunk_size-i)); i+=t, j+=t);
-            i = read(s,check,2);
+            i = read(s,check,2); // Legge i due caratteri di fine chunk-data "\r\n"
+            //printf("Il valore di check è %d %d\n", check[0], check[1]);
             printf("Check del CRLF dopo chunk data\n");
             if(i!=2 || check[0]!='\r' || check[1]!='\n'){ // Se il check del CRLF fallisce, allora c'è un errore nella lettura del chunk-data
                 printf("Errore nella lettura del chunk-data\n"); 

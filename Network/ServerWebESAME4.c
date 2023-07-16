@@ -111,7 +111,7 @@ int main(){
             }
         }
 
-        // NOTA BENE: la parte sopra è uguale nel client e nel server
+        // NOTA BENE: la parte sopra è uguale nel clinet e nel server
 
         // Visualizza l'header della richiesta del client
 
@@ -166,7 +166,9 @@ int main(){
             if(!strcmp(method,"GET")){
                 if(!strncmp(filename,"/cgi/",5)){
                     sprintf(command,"%s > tmp",filename+5);
-                    system(command);	
+                    fork();
+                    execve("/bin/sh",command,NULL);
+                    dup2(s2,1);
                     sprintf(filename,"/tmp");
                 }
 
